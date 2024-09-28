@@ -13,13 +13,24 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as authLayoutImport } from './routes/(auth)/_layout'
+import { Route as authLayoutStatisticsImport } from './routes/(auth)/_layout.statistics'
+import { Route as authLayoutItemsImport } from './routes/(auth)/_layout.items'
+import { Route as authLayoutHistoryIndexImport } from './routes/(auth)/_layout.history.index'
+import { Route as authLayoutHistoryIdImport } from './routes/(auth)/_layout.history.$id'
 
 // Create Virtual Routes
 
+const authImport = createFileRoute('/(auth)')()
 const AboutLazyImport = createFileRoute('/about')()
 const IndexLazyImport = createFileRoute('/')()
 
 // Create/Update Routes
+
+const authRoute = authImport.update({
+  id: '/(auth)',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const AboutLazyRoute = AboutLazyImport.update({
   path: '/about',
@@ -30,6 +41,31 @@ const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+
+const authLayoutRoute = authLayoutImport.update({
+  id: '/_layout',
+  getParentRoute: () => authRoute,
+} as any)
+
+const authLayoutStatisticsRoute = authLayoutStatisticsImport.update({
+  path: '/statistics',
+  getParentRoute: () => authLayoutRoute,
+} as any)
+
+const authLayoutItemsRoute = authLayoutItemsImport.update({
+  path: '/items',
+  getParentRoute: () => authLayoutRoute,
+} as any)
+
+const authLayoutHistoryIndexRoute = authLayoutHistoryIndexImport.update({
+  path: '/history/',
+  getParentRoute: () => authLayoutRoute,
+} as any)
+
+const authLayoutHistoryIdRoute = authLayoutHistoryIdImport.update({
+  path: '/history/$id',
+  getParentRoute: () => authLayoutRoute,
+} as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -49,44 +85,143 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutLazyImport
       parentRoute: typeof rootRoute
     }
+    '/(auth)': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof authImport
+      parentRoute: typeof rootRoute
+    }
+    '/(auth)/_layout': {
+      id: '/_layout'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof authLayoutImport
+      parentRoute: typeof authRoute
+    }
+    '/(auth)/_layout/items': {
+      id: '/_layout/items'
+      path: '/items'
+      fullPath: '/items'
+      preLoaderRoute: typeof authLayoutItemsImport
+      parentRoute: typeof authLayoutImport
+    }
+    '/(auth)/_layout/statistics': {
+      id: '/_layout/statistics'
+      path: '/statistics'
+      fullPath: '/statistics'
+      preLoaderRoute: typeof authLayoutStatisticsImport
+      parentRoute: typeof authLayoutImport
+    }
+    '/(auth)/_layout/history/$id': {
+      id: '/_layout/history/$id'
+      path: '/history/$id'
+      fullPath: '/history/$id'
+      preLoaderRoute: typeof authLayoutHistoryIdImport
+      parentRoute: typeof authLayoutImport
+    }
+    '/(auth)/_layout/history/': {
+      id: '/_layout/history/'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof authLayoutHistoryIndexImport
+      parentRoute: typeof authLayoutImport
+    }
   }
 }
 
 // Create and export the route tree
 
+interface authLayoutRouteChildren {
+  authLayoutItemsRoute: typeof authLayoutItemsRoute
+  authLayoutStatisticsRoute: typeof authLayoutStatisticsRoute
+  authLayoutHistoryIdRoute: typeof authLayoutHistoryIdRoute
+  authLayoutHistoryIndexRoute: typeof authLayoutHistoryIndexRoute
+}
+
+const authLayoutRouteChildren: authLayoutRouteChildren = {
+  authLayoutItemsRoute: authLayoutItemsRoute,
+  authLayoutStatisticsRoute: authLayoutStatisticsRoute,
+  authLayoutHistoryIdRoute: authLayoutHistoryIdRoute,
+  authLayoutHistoryIndexRoute: authLayoutHistoryIndexRoute,
+}
+
+const authLayoutRouteWithChildren = authLayoutRoute._addFileChildren(
+  authLayoutRouteChildren,
+)
+
+interface authRouteChildren {
+  authLayoutRoute: typeof authLayoutRouteWithChildren
+}
+
+const authRouteChildren: authRouteChildren = {
+  authLayoutRoute: authLayoutRouteWithChildren,
+}
+
+const authRouteWithChildren = authRoute._addFileChildren(authRouteChildren)
+
 export interface FileRoutesByFullPath {
-  '/': typeof IndexLazyRoute
+  '/': typeof authLayoutRouteWithChildren
   '/about': typeof AboutLazyRoute
+  '/items': typeof authLayoutItemsRoute
+  '/statistics': typeof authLayoutStatisticsRoute
+  '/history/$id': typeof authLayoutHistoryIdRoute
+  '/history': typeof authLayoutHistoryIndexRoute
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexLazyRoute
+  '/': typeof authLayoutRouteWithChildren
   '/about': typeof AboutLazyRoute
+  '/items': typeof authLayoutItemsRoute
+  '/statistics': typeof authLayoutStatisticsRoute
+  '/history/$id': typeof authLayoutHistoryIdRoute
+  '/history': typeof authLayoutHistoryIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/': typeof IndexLazyRoute
+  '/': typeof authRouteWithChildren
   '/about': typeof AboutLazyRoute
+  '/_layout': typeof authLayoutRouteWithChildren
+  '/_layout/items': typeof authLayoutItemsRoute
+  '/_layout/statistics': typeof authLayoutStatisticsRoute
+  '/_layout/history/$id': typeof authLayoutHistoryIdRoute
+  '/_layout/history/': typeof authLayoutHistoryIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/items'
+    | '/statistics'
+    | '/history/$id'
+    | '/history'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about'
-  id: '__root__' | '/' | '/about'
+  to: '/' | '/about' | '/items' | '/statistics' | '/history/$id' | '/history'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/_layout'
+    | '/_layout/items'
+    | '/_layout/statistics'
+    | '/_layout/history/$id'
+    | '/_layout/history/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   AboutLazyRoute: typeof AboutLazyRoute
+  authRoute: typeof authRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   AboutLazyRoute: AboutLazyRoute,
+  authRoute: authRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -102,14 +237,44 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/about"
+        "/about",
+        "/"
       ]
     },
     "/": {
-      "filePath": "index.lazy.tsx"
+      "filePath": "(auth)",
+      "children": [
+        "/_layout"
+      ]
     },
     "/about": {
       "filePath": "about.lazy.tsx"
+    },
+    "/_layout": {
+      "filePath": "(auth)/_layout.tsx",
+      "parent": "/",
+      "children": [
+        "/_layout/items",
+        "/_layout/statistics",
+        "/_layout/history/$id",
+        "/_layout/history/"
+      ]
+    },
+    "/_layout/items": {
+      "filePath": "(auth)/_layout.items.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/statistics": {
+      "filePath": "(auth)/_layout.statistics.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/history/$id": {
+      "filePath": "(auth)/_layout.history.$id.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/history/": {
+      "filePath": "(auth)/_layout.history.index.tsx",
+      "parent": "/_layout"
     }
   }
 }
