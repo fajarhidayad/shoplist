@@ -1,0 +1,19 @@
+{
+  "name": "shoplist",
+  "module": "index.ts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "concurrently": "^9.0.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}
