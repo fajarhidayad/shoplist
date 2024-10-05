@@ -1,62 +1,156 @@
 import { ReactNode } from '@tanstack/react-router';
 import TitleText from '../TitleText';
 import { useSidebarMenu } from '@/context/sidebar-context';
+import { useForm } from '@tanstack/react-form';
+import { zodValidator } from '@tanstack/zod-form-adapter';
+import { z } from 'zod';
+import FieldInfo from '../field-info';
 
 export default function SidebarForm() {
   const { dispatch } = useSidebarMenu();
+  const form = useForm({
+    defaultValues: {
+      name: '',
+      note: '',
+      image: '',
+      category: '',
+    },
+    onSubmit: async ({ value }) => {
+      console.log(value);
+    },
+    validatorAdapter: zodValidator(),
+  });
 
   return (
-    <>
+    <form
+      onSubmit={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        form.handleSubmit();
+      }}
+    >
       <TitleText className="font-medium mb-8">Add a new item</TitleText>
-
-      <FormControl htmlFor="name" label="Name">
-        <input
-          type="text"
-          id="name"
-          name="name"
-          placeholder="Enter a name"
-          className="border-2 border-slate-400 rounded-xl py-5 px-4 bg-transparent focus:outline-main"
-        />
-      </FormControl>
-      <FormControl htmlFor="note" label="note (optional)">
-        <textarea
-          id="note"
-          name="note"
-          placeholder="Enter a note"
-          className="border-2 border-slate-400 rounded-xl py-5 px-4 bg-transparent focus:outline-main"
-        />
-      </FormControl>
-      <FormControl htmlFor="image" label="Image (optional)">
-        <input
-          type="text"
-          id="image"
-          name="image"
-          placeholder="Enter a image"
-          className="border-2 border-slate-400 rounded-xl py-5 px-4 bg-transparent focus:outline-main"
-        />
-      </FormControl>
-      <FormControl htmlFor="category" label="Category">
-        <input
-          type="text"
-          id="category"
-          name="category"
-          placeholder="Enter a category"
-          className="border-2 border-slate-400 rounded-xl py-5 px-4 bg-transparent focus:outline-main"
-        />
-      </FormControl>
-
+      <form.Field
+        name="name"
+        validators={{
+          onChange: z.string().min(3),
+        }}
+        children={(field) => (
+          <FormControl htmlFor={field.name} label="Name">
+            <input
+              type="text"
+              id={field.name}
+              name={field.name}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+              placeholder="Enter a name"
+              className="border-2 border-slate-400 rounded-xl py-5 px-4 bg-transparent focus:outline-main"
+            />
+            <FieldInfo
+              isTouched={field.state.meta.isTouched}
+              length={field.state.meta.errors.length}
+            >
+              {field.state.meta.errors.join(',')}
+            </FieldInfo>
+          </FormControl>
+        )}
+      />
+      <form.Field
+        name="note"
+        validators={{
+          onChange: z.string().nullish(),
+        }}
+        children={(field) => (
+          <FormControl htmlFor={field.name} label="note (optional)">
+            <textarea
+              id={field.name}
+              name={field.name}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+              placeholder="Enter a note"
+              className="border-2 border-slate-400 rounded-xl py-5 px-4 bg-transparent focus:outline-main"
+            />
+            <FieldInfo
+              isTouched={field.state.meta.isTouched}
+              length={field.state.meta.errors.length}
+            >
+              {field.state.meta.errors.join(',')}
+            </FieldInfo>
+          </FormControl>
+        )}
+      />
+      <form.Field
+        name="image"
+        validators={{
+          onChange: z.string().nullish(),
+        }}
+        children={(field) => (
+          <FormControl htmlFor={field.name} label="Image (optional)">
+            <input
+              type="text"
+              id={field.name}
+              name={field.name}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+              placeholder="Enter a image"
+              className="border-2 border-slate-400 rounded-xl py-5 px-4 bg-transparent focus:outline-main"
+            />
+            <FieldInfo
+              isTouched={field.state.meta.isTouched}
+              length={field.state.meta.errors.length}
+            >
+              {field.state.meta.errors.join(',')}
+            </FieldInfo>
+          </FormControl>
+        )}
+      />
+      <form.Field
+        name="category"
+        validators={{
+          onChange: z.string().min(3),
+        }}
+        children={(field) => (
+          <FormControl htmlFor={field.name} label="Category">
+            <input
+              type="text"
+              id={field.name}
+              name={field.name}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+              placeholder="Enter a category"
+              className="border-2 border-slate-400 rounded-xl py-5 px-4 bg-transparent focus:outline-main"
+            />
+            <FieldInfo
+              isTouched={field.state.meta.isTouched}
+              length={field.state.meta.errors.length}
+            >
+              {field.state.meta.errors.join(',')}
+            </FieldInfo>
+          </FormControl>
+        )}
+      />
       <div className="absolute bottom-0 right-0 flex items-center justify-center w-full space-x-5 py-8">
         <button
+          type="button"
           onClick={() => dispatch({ payload: 'list', type: 'SET_MENU_TYPE' })}
           className="font-bold text-slate-800 px-6 py-5 rounded-xl hover:bg-main/20"
         >
           cancel
         </button>
-        <button className="bg-main text-white font-bold px-6 py-5 rounded-xl">
-          Save
-        </button>
+        <form.Subscribe
+          selector={(state) => [state.canSubmit, state.isSubmitting]}
+          children={([canSubmit, isSubmitting]) => (
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className="bg-main disabled:bg-main/80 text-white font-bold px-6 py-5 rounded-xl"
+            >
+              {isSubmitting ? 'Saving...' : 'Save'}
+            </button>
+          )}
+        />
       </div>
-    </>
+    </form>
   );
 }
 

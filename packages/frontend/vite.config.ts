@@ -11,4 +11,14 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    cors: {
+      credentials: true,
+    },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5050',
+      },
+    },
+  },
 });

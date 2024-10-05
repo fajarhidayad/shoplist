@@ -11,6 +11,7 @@ import {
   createFileRoute,
   Link,
   Outlet,
+  redirect,
   useLocation,
 } from '@tanstack/react-router';
 import clsx from 'clsx';
@@ -22,11 +23,27 @@ import {
 } from 'lucide-react';
 import { ReactNode } from 'react';
 
-export const Route = createFileRoute('/(auth)/_layout')({
-  component: AuthLayout,
+export const Route = createFileRoute('/_user')({
+  component: UserLayout,
+  beforeLoad: async ({ context }) => {
+    const { auth } = context;
+    if (!auth.isAuthenticated) {
+      const res = await fetch('/api/auth/profile', {
+        method: 'GET',
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        throw redirect({
+          to: '/login',
+        });
+      }
+      const profile = await res.json();
+      auth.login(profile.data);
+    }
+  },
 });
 
-function AuthLayout() {
+function UserLayout() {
   return (
     <SidebarContextProvider>
       <div className="min-h-screen bg-slate-50 flex">

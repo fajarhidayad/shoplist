@@ -1,11 +1,11 @@
-import BackLink from '@/components/back-link';
-import TitleText from '@/components/TitleText';
-import { createFileRoute } from '@tanstack/react-router';
-import { CalendarDaysIcon } from 'lucide-react';
+import BackLink from '@/components/back-link'
+import TitleText from '@/components/TitleText'
+import { createFileRoute } from '@tanstack/react-router'
+import { CalendarDaysIcon } from 'lucide-react'
 
-export const Route = createFileRoute('/(auth)/_layout/history/$id')({
+export const Route = createFileRoute('/_user/history/$id')({
   component: HistoryDetailsPage,
-});
+})
 
 function HistoryDetailsPage() {
   return (
@@ -26,7 +26,7 @@ function HistoryDetailsPage() {
         </ul>
       </section>
     </>
-  );
+  )
 }
 
 function DetailsItem(props: { name: string; quantity: number }) {
@@ -35,5 +35,5 @@ function DetailsItem(props: { name: string; quantity: number }) {
       <p>{props.name}</p>
       <p className="text-main font-bold text-xs">{props.quantity} pcs</p>
     </li>
-  );
+  )
 }

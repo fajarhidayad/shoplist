@@ -10,7 +10,7 @@ import {
   YAxis,
 } from 'recharts';
 
-export const Route = createFileRoute('/(auth)/_layout/statistics')({
+export const Route = createFileRoute('/_user/statistics')({
   component: StatisticsPage,
 });
 
@@ -111,7 +111,7 @@ function StatisticsPage() {
       <div className="w-full">
         <TitleText className="mb-10">Monthly Summary</TitleText>
         <LineChart
-          width={900}
+          width={600}
           height={300}
           data={data}
           margin={{ top: 5, right: 20, bottom: 5, left: 0 }}

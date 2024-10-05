@@ -1,10 +1,10 @@
-import TitleText from '@/components/TitleText';
-import { createFileRoute, useRouter } from '@tanstack/react-router';
-import { CalendarDaysIcon, ChevronRightIcon } from 'lucide-react';
+import TitleText from '@/components/TitleText'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { CalendarDaysIcon, ChevronRightIcon } from 'lucide-react'
 
-export const Route = createFileRoute('/(auth)/_layout/history/')({
+export const Route = createFileRoute('/_user/history/')({
   component: HistoryPage,
-});
+})
 
 function HistoryPage() {
   return (
@@ -28,16 +28,16 @@ function HistoryPage() {
         />
       </section>
     </>
-  );
+  )
 }
 
 function HistoryItem(props: {
-  id: number;
-  title: string;
-  date: string;
-  status: boolean;
+  id: number
+  title: string
+  date: string
+  status: boolean
 }) {
-  const { navigate } = useRouter();
+  const { navigate } = useRouter()
   return (
     <div
       onClick={() => navigate({ to: `/history/${props.id}` })}
@@ -57,5 +57,5 @@ function HistoryItem(props: {
       )}
       <ChevronRightIcon className="text-main" />
     </div>
-  );
+  )
 }

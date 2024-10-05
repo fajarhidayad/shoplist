@@ -6,6 +6,9 @@ export default {
     fontFamily: {
       sans: ['Quicksand', 'sans-serif'],
     },
+    container: {
+      center: true,
+    },
     extend: {
       borderRadius: {
         lg: 'var(--radius)',

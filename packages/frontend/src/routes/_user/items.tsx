@@ -1,12 +1,12 @@
-import TitleText from '@/components/TitleText';
-import { useSidebarMenu } from '@/context/sidebar-context';
-import { createFileRoute } from '@tanstack/react-router';
-import { PlusIcon, SearchIcon } from 'lucide-react';
-import { ReactNode } from 'react';
+import TitleText from '@/components/TitleText'
+import { useSidebarMenu } from '@/context/sidebar-context'
+import { createFileRoute } from '@tanstack/react-router'
+import { PlusIcon, SearchIcon } from 'lucide-react'
+import { ReactNode } from 'react'
 
-export const Route = createFileRoute('/(auth)/_layout/items')({
+export const Route = createFileRoute('/_user/items')({
   component: ItemsPage,
-});
+})
 
 function ItemsPage() {
   return (
@@ -37,11 +37,11 @@ function ItemsPage() {
         </ul>
       </section>
     </>
-  );
+  )
 }
 
 function ShopItem(props: { children: ReactNode }) {
-  const { dispatch } = useSidebarMenu();
+  const { dispatch } = useSidebarMenu()
 
   return (
     <li
@@ -51,12 +51,12 @@ function ShopItem(props: { children: ReactNode }) {
       <p className="font-medium">{props.children}</p>
       <button
         onClick={(e) => {
-          e.stopPropagation();
+          e.stopPropagation()
         }}
         className="text-slate-400 rounded-full hover:bg-main/20 p-1"
       >
         <PlusIcon />
       </button>
     </li>
-  );
+  )
 }
