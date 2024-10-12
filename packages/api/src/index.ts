@@ -7,8 +7,9 @@ import { lucia } from './lib/auth';
 import env from './lib/env';
 import { authRouter } from './routes/auth.route';
 import type { Context } from './lib/context';
-import { categoryRouter } from './routes/category.route';
+import { categoryRoutes } from './routes/category.route';
 import { HTTPException } from 'hono/http-exception';
+import { itemRoutes } from './routes/item.route';
 
 const PORT = env.PORT;
 const app = new Hono<Context>();
@@ -65,13 +66,17 @@ const api = app
     }
     return next();
   })
-  .route('/categories', categoryRouter)
+  .route('/categories', categoryRoutes)
+  .route('/items', itemRoutes)
   .onError((err, c) => {
     if (c.res.status >= 500) {
-      return c.json({
-        message: 'Internal server error',
-        stack: err.stack,
-      });
+      return c.json(
+        {
+          message: 'Internal server error',
+          stack: err.stack,
+        },
+        500
+      );
     }
 
     return c.json({
@@ -79,10 +84,12 @@ const api = app
     });
   })
   .notFound((c) => {
-    c.status(404);
-    return c.json({
-      message: 'not found',
-    });
+    return c.json(
+      {
+        message: 'not found',
+      },
+      404
+    );
   });
 
 export default {

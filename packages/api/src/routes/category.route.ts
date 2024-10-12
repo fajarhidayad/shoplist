@@ -5,13 +5,11 @@ import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { HTTPException } from 'hono/http-exception';
 
-export const categoryRouter = new Hono<Context>();
-
 const schema = z.object({
   name: z.string().min(3),
 });
 
-categoryRouter
+export const categoryRoutes = new Hono<Context>()
   .get('/', async (c) => {
     const session = c.get('session');
 

@@ -1,10 +1,10 @@
-import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
-import { z } from 'zod';
-import type { Context } from '../lib/context';
-import { lucia } from '../lib/auth';
-import { prisma } from '../db/prisma';
+import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
+import { z } from 'zod';
+import { prisma } from '../db/prisma';
+import { lucia } from '../lib/auth';
+import type { Context } from '../lib/context';
 
 const registerSchema = z.object({
   firstName: z.string().min(3),
@@ -20,11 +20,13 @@ export const authRouter = new Hono<Context>()
     '/register',
     zValidator('json', registerSchema, (result, c) => {
       if (!result.success) {
-        c.status(400);
-        return c.json({
-          message: 'Invalid form request',
-          error: result.error.flatten().fieldErrors,
-        });
+        return c.json(
+          {
+            message: 'Invalid form payload',
+            error: result.error.flatten().fieldErrors,
+          },
+          400
+        );
       }
     }),
     async (c) => {
@@ -37,14 +39,16 @@ export const authRouter = new Hono<Context>()
       });
 
       if (user) {
-        c.status(400);
-        return c.json({
-          message: 'Email already exist',
-        });
+        return c.json(
+          {
+            message: 'Email/User already exist',
+          },
+          400
+        );
       }
 
       const hash = await Bun.password.hash(formData.password, {
-        algorithm: 'argon2d',
+        algorithm: 'argon2id',
       });
 
       const newUser = await prisma.user.create({
@@ -58,20 +62,25 @@ export const authRouter = new Hono<Context>()
       const sessionCookie = lucia.createSessionCookie(session.id);
       c.header('Set-Cookie', sessionCookie.serialize());
 
-      return c.json({
-        message: 'success',
-      });
+      return c.json(
+        {
+          message: 'success',
+        },
+        201
+      );
     }
   )
   .post(
     '/login',
     zValidator('json', loginSchema, (result, c) => {
       if (!result.success) {
-        c.status(400);
-        return c.json({
-          message: 'Invalid form request',
-          error: result.error.flatten().fieldErrors,
-        });
+        return c.json(
+          {
+            message: 'Invalid form payload',
+            error: result.error.flatten().fieldErrors,
+          },
+          400
+        );
       }
     }),
     async (c) => {
@@ -86,7 +95,7 @@ export const authRouter = new Hono<Context>()
       if (!user) {
         c.status(400);
         return c.json({
-          message: 'Invalid email or password.',
+          message: 'Incorrect email or password.',
         });
       }
 
@@ -98,7 +107,7 @@ export const authRouter = new Hono<Context>()
       if (!password) {
         c.status(400);
         return c.json({
-          message: 'Invalid email or password.',
+          message: 'Incorrect email or password.',
         });
       }
 
@@ -113,12 +122,14 @@ export const authRouter = new Hono<Context>()
   )
   .post('/logout', async (c) => {
     const user = c.get('user');
-    if (!user) {
+    const session = c.get('session');
+    if (!user || !session) {
       c.status(401);
       return c.json({
         message: 'unauthorized',
       });
     }
+    await lucia.invalidateSession(session.id);
     c.header('Set-Cookie', lucia.createBlankSessionCookie().serialize());
     return c.json({
       message: 'success',

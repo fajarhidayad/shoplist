@@ -9,6 +9,8 @@ const EnvSchema = z.object({
   PORT: z.coerce.number(),
   DATABASE_URL: z.string(),
   DOMAIN: z.string(),
+  GOOGLE_CLIENT_ID: z.string(),
+  GOOGLE_CLIENT_SECRET: z.string(),
 });
 
 export type EnvSchema = z.infer<typeof EnvSchema>;

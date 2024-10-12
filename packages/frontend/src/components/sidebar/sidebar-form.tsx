@@ -5,9 +5,12 @@ import { useForm } from '@tanstack/react-form';
 import { zodValidator } from '@tanstack/zod-form-adapter';
 import { z } from 'zod';
 import FieldInfo from '../field-info';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function SidebarForm() {
-  const { dispatch } = useSidebarMenu();
+  const { setSidebarItemList } = useSidebarMenu();
+  const queryClient = useQueryClient();
+
   const form = useForm({
     defaultValues: {
       name: '',
@@ -16,9 +19,32 @@ export default function SidebarForm() {
       category: '',
     },
     onSubmit: async ({ value }) => {
-      console.log(value);
+      itemMutation.mutate(value);
     },
     validatorAdapter: zodValidator(),
+  });
+
+  const itemMutation = useMutation({
+    mutationFn: async (data: typeof form.state.values) => {
+      const res = await fetch('/api/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        credentials: 'include',
+      });
+
+      const resData = await res.json();
+
+      if (!res.ok) {
+        throw new Error(resData.message);
+      }
+
+      return resData;
+    },
+    onSuccess: () => {
+      setSidebarItemList();
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
   });
 
   return (
@@ -132,7 +158,7 @@ export default function SidebarForm() {
       <div className="absolute bottom-0 right-0 flex items-center justify-center w-full space-x-5 py-8">
         <button
           type="button"
-          onClick={() => dispatch({ payload: 'list', type: 'SET_MENU_TYPE' })}
+          onClick={() => setSidebarItemList()}
           className="font-bold text-slate-800 px-6 py-5 rounded-xl hover:bg-main/20"
         >
           cancel

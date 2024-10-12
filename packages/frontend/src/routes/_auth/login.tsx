@@ -14,11 +14,6 @@ export const Route = createFileRoute('/_auth/login')({
   component: LoginPage,
 });
 
-interface LoginSchema {
-  email: string;
-  password: string;
-}
-
 function LoginPage() {
   const form = useForm({
     defaultValues: {
@@ -26,13 +21,13 @@ function LoginPage() {
       password: '',
     },
     onSubmit: async ({ value }) => {
-      mutation.mutate(value);
+      loginMutation.mutate(value);
     },
     validatorAdapter: zodValidator(),
   });
 
-  const mutation = useMutation({
-    mutationFn: async (data: LoginSchema) => {
+  const loginMutation = useMutation({
+    mutationFn: async (data: typeof form.state.values) => {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
@@ -121,9 +116,9 @@ function LoginPage() {
             </div>
           )}
         />
-        {mutation.error && (
+        {loginMutation.error && (
           <div>
-            <em className="text-red-500">{mutation.error.message}</em>
+            <em className="text-red-500">{loginMutation.error.message}</em>
           </div>
         )}
         <form.Subscribe

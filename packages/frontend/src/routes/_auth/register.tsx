@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from '@tanstack/react-form';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { useMutation } from '@tanstack/react-query';
+import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import { zodValidator } from '@tanstack/zod-form-adapter';
 import { z } from 'zod';
 
@@ -22,9 +23,33 @@ function RegisterPage() {
       password: '',
     },
     onSubmit: async ({ value }) => {
-      console.log(value);
+      registerMutation.mutate(value);
     },
     validatorAdapter: zodValidator(),
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: async (data: typeof form.state.values) => {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+
+      const resData = await res.json();
+
+      if (!res.ok) {
+        throw new Error(resData.message);
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      redirect({ to: '/items' });
+    },
   });
 
   return (
@@ -149,6 +174,11 @@ function RegisterPage() {
             </div>
           )}
         />
+        {registerMutation.error && (
+          <div>
+            <em className="text-red-500">{registerMutation.error.message}</em>
+          </div>
+        )}
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
           children={([canSubmit, isSubmitting]) => (

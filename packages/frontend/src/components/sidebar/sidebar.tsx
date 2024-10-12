@@ -4,13 +4,13 @@ import SidebarForm from './sidebar-form';
 import SidebarDetails from './sidebar-details';
 
 export default function Sidebar() {
-  const { menu } = useSidebarMenu();
+  const { state } = useSidebarMenu();
 
   return (
     <aside className="w-[400px] bg-[#FFF0DE] px-12 py-10 flex flex-col relative">
-      {menu.type === 'list' && <SidebarList />}
-      {menu.type === 'form' && <SidebarForm />}
-      {menu.type === 'details' && <SidebarDetails />}
+      {state.menu === 'list' && <SidebarList />}
+      {state.menu === 'form' && <SidebarForm />}
+      {state.menu === 'details' && <SidebarDetails />}
     </aside>
   );
 }

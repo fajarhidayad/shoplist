@@ -23,6 +23,7 @@ export const lucia = new Lucia(adapter, {
     attributes: {
       secure: env.NODE_ENV === 'production',
       sameSite: 'lax',
+      path: '/',
       // domain: env.DOMAIN,
     },
   },

@@ -2,7 +2,7 @@ import BottleSVG from '@/assets/bottle-svg';
 import { useSidebarMenu } from '@/context/sidebar-context';
 
 export default function SidebarList() {
-  const { dispatch } = useSidebarMenu();
+  const { setSidebarItemForm } = useSidebarMenu();
 
   return (
     <>
@@ -15,7 +15,7 @@ export default function SidebarList() {
             Didn’t find what you need?
           </p>
           <button
-            onClick={() => dispatch({ type: 'SET_MENU_TYPE', payload: 'form' })}
+            onClick={() => setSidebarItemForm()}
             className="bg-white font-bold rounded-xl px-7 py-3 text-sm"
           >
             Add item

@@ -1,14 +1,32 @@
-import TitleText from '@/components/TitleText'
-import { useSidebarMenu } from '@/context/sidebar-context'
-import { createFileRoute } from '@tanstack/react-router'
-import { PlusIcon, SearchIcon } from 'lucide-react'
-import { ReactNode } from 'react'
+import TitleText from '@/components/TitleText';
+import { useSidebarMenu } from '@/context/sidebar-context';
+import { CategoriesWithItemsResType, Item } from '@/lib/client';
+import { useQuery } from '@tanstack/react-query';
+import { createFileRoute } from '@tanstack/react-router';
+import { PlusIcon, SearchIcon } from 'lucide-react';
 
 export const Route = createFileRoute('/_user/items')({
   component: ItemsPage,
-})
+});
 
 function ItemsPage() {
+  const { data: categories } = useQuery({
+    queryKey: ['items'],
+    queryFn: async () => {
+      const res = await fetch('/api/items', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const resData = (await res.json()) as CategoriesWithItemsResType;
+
+      return resData.data;
+    },
+  });
+
   return (
     <>
       <section className="flex items-start justify-between mb-14">
@@ -30,33 +48,40 @@ function ItemsPage() {
         </div>
       </section>
 
-      <section>
-        <h2 className="font-medium text-lg mb-4">Fruit and vegetables</h2>
-        <ul className="grid grid-cols-4 gap-x-5">
-          <ShopItem>Avocado</ShopItem>
-        </ul>
-      </section>
+      {categories &&
+        categories.map((category) => (
+          <section key={category.id} className="mb-8">
+            <h2 className="font-medium text-lg mb-4">{category.name}</h2>
+            <ul className="grid grid-cols-4 gap-5">
+              {category.items.map((item) => (
+                <ShopItem key={item.id} item={item} category={category.name} />
+              ))}
+            </ul>
+          </section>
+        ))}
     </>
-  )
+  );
 }
 
-function ShopItem(props: { children: ReactNode }) {
-  const { dispatch } = useSidebarMenu()
+function ShopItem(props: { item: Item; category: string }) {
+  const { setSidebarItemDetails } = useSidebarMenu();
 
   return (
     <li
-      onClick={() => dispatch({ type: 'SET_MENU_TYPE', payload: 'details' })}
+      onClick={() =>
+        setSidebarItemDetails({ ...props.item, category: props.category })
+      }
       className="bg-white rounded-xl px-4 py-3 flex justify-between items-center shadow cursor-pointer"
     >
-      <p className="font-medium">{props.children}</p>
+      <p className="font-medium">{props.item.name}</p>
       <button
         onClick={(e) => {
-          e.stopPropagation()
+          e.stopPropagation();
         }}
         className="text-slate-400 rounded-full hover:bg-main/20 p-1"
       >
         <PlusIcon />
       </button>
     </li>
-  )
+  );
 }
